@@ -1,0 +1,43 @@
+#!/bin/sh
+# Copyright 2014 Google Inc.
+#
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+for prog in clang-format-diff.py clang-format; do
+	if ! command -v $prog > /dev/null ; then
+		echo please install $prog >&2
+		exit 1
+	fi
+done
+
+SKIA_STYLE='{
+  BasedOnStyle: Google,
+  ColumnLimit: 80,
+  IndentWidth: 4,
+  AccessModifierOffset: -4,
+  BreakConstructorInitializersBeforeComma: true,
+  BinPackParameters: false,
+  PenaltyBreakComment: 1000,
+  AllowShortIfStatementsOnASingleLine: false,
+  AllowShortFunctionsOnASingleLine: false,
+  AllowShortLoopsOnASingleLine: false,
+  ContinuationIndentWidth: 8,
+}'
+
+# Strip out the -i argument (if present) and pass that to clang-format.
+# Other arguments are passed to git-diff.
+IN_PLACE=''
+ARGV=''
+# see http://www.etalabs.net/sh_tricks.html
+quote() { printf %s\\n "$1" | sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
+for arg do
+	if [ "$arg" = "-i" ] ; then
+		IN_PLACE='-i'
+	else
+		ARGV="${ARGV} $(quote "$arg")"
+	fi
+done
+eval "set -- $ARGV"
+
+git diff -U0 "$@" | clang-format-diff.py -p1 $IN_PLACE -style="$SKIA_STYLE" 
