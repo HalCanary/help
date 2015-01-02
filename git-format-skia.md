@@ -21,4 +21,4 @@ To reformat and amend the last commit:
 
 2.  Install clang-format (TODO: document this).
 
-3.  Install clang-format-diff.py (TODO: document this).
+3.  Install [clang-format-diff.py](https://llvm.org/svn/llvm-project/cfe/trunk/tools/clang-format/clang-format-diff.py).
